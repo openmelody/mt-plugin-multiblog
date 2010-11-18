@@ -1,0 +1,88 @@
+name: MultiBlog
+id: multiblog
+description: MultiBlog allows you to publish content from other blogs and define publishing rules and access controls between them.
+version: 2.2
+author_name: Endevver, LLC/Six Apart, Ltd.
+author_link: http://www.endevver.com/
+system_config_template: system_config.tmpl
+blog_config_template: blog_config.tmpl
+
+settings:
+  default_access_allowed:
+    default:  1
+    scope: system
+  rebuild_triggers:
+    default: ''
+    scope: blog
+  blog_content_accessible:
+    default: ''
+    scope: blog
+  other_triggers:
+    scope  : blog
+  all_triggers:
+    scope  : system
+  default_mtmultiblog_action:
+    default:  1
+    scope: blog
+  default_mtmulitblog_blogs:
+    default: ''
+    scope: blog
+
+l10n_class: 'MultiBlog::L10N'
+
+applications:
+  cms:
+    methods:
+      multiblog_add_trigger: $multiblog::MultiBlog::Plugin::add_trigger
+
+tags:
+  help_url: http://www.movabletype.org/documentation/appendices/tags/%t.html
+  block:
+    Entries: $multiblog::MultiBlog::Plugin::preprocess_native_tags
+    Categories: $multiblog::MultiBlog::Plugin::preprocess_native_tags
+    Comments: $multiblog::MultiBlog::Plugin::preprocess_native_tags
+    Pages: $multiblog::MultiBlog::Plugin::preprocess_native_tags
+    Folders: $multiblog::MultiBlog::Plugin::preprocess_native_tags
+    Blogs: $multiblog::MultiBlog::Plugin::preprocess_native_tags
+    Assets: $multiblog::MultiBlog::Plugin::preprocess_native_tags
+    Comments: $multiblog::MultiBlog::Plugin::preprocess_native_tags
+    Pings: $multiblog::MultiBlog::Plugin::preprocess_native_tags
+    Authors: $multiblog::MultiBlog::Plugin::preprocess_native_tags
+    Tags: $multiblog::MultiBlog::Plugin::preprocess_native_tags
+    MultiBlogPlugin: $multiblog::MultiBlog::Tags::Plugin
+    OtherBlog: $multiblog::MultiBlog::Tags::MultiBlog
+    MultiBlogLocalBlog: $multiblog::MultiBlog::Tags::MultiBlogLocalBlog
+    MultiBlogIfLocalBlog?: $multiblog::MultiBlog::Tags::MultiBlogIfLocalBlog
+  function:
+    Include: $multiblog::MultiBlog::Plugin::preprocess_native_tags
+    BlogCategoryCount: $multiblog::MultiBlog::Plugin::preprocess_native_tags
+    BlogEntryCount: $multiblog::MultiBlog::Plugin::preprocess_native_tags
+    BlogPingCount: $multiblog::MultiBlog::Plugin::preprocess_native_tags
+    TagSearchLink: $multiblog::MultiBlog::Plugin::preprocess_native_tags
+
+init: sub { my $p = shift; require MultiBlog::Plugin; bless $p, 'MultiBlog::Plugin'; }
+
+callbacks:
+  cms_post_save.entry: 
+    handler: $multiblog::MultiBlog::Plugin::post_entry_save
+    priority: 10
+  scheduled_post_published: 
+    handler: $multiblog::MultiBlog::Plugin::post_entry_pub
+    priority: 10
+  MT::Comment::post_save:
+    handler: $multiblog::MultiBlog::Plugin::post_comment_save
+    priority: 10
+  MT::TBPing::post_save: 
+    handler: $multiblog::MultiBlog::Plugin::post_tb_save
+    priority: 10
+
+multiblog_actions:
+  ri:
+    label: 'rebuild indexes.'
+    handler: $multiblog::MultiBlog::Plugin::action_ri
+  raa:
+    label: 'rebuild author archives.'
+    handler: $multiblog::MultiBlog::Plugin::action_raa
+  rip:
+    label: 'rebuild indexes and send pings.'
+    handler: $multiblog::MultiBlog::Plugin::action_rip
